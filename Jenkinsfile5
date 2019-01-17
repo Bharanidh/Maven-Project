@@ -1,0 +1,19 @@
+node {
+    stage('Source code pull') {
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/Bharanidh/Maven-Project.git']]])
+        mvnHome = tool 'Maven'
+    }
+    stage('Build'){
+    bat 'mvn -B -DskipTests clean package'
+    }
+    stage ('Upload war file to S3 Bucket'){
+        s3Upload consoleLogLevel: 'INFO', dontWaitForConcurrentBuildCompletion: false, entries: [[bucket: 'awssa12345', excludedFile: '', flatten: false, gzipFiles: false, keepForever: false, managedArtifacts: true, noUploadOnFailure: false, selectedRegion: 'us-east-1', showDirectlyInBrowser: false, sourceFile: '**/*.war', storageClass: 'STANDARD', uploadFromSlave: false, useServerSideEncryption: false]], pluginFailureResultConstraint: 'FAILURE', profileName: 'S3_Profile', userMetadata: []
+    }
+    stage('Deployment'){
+        bat 'echo %JENKINS_HOME%'
+       bat 'copy target\\homeloan-1.0-SNAPSHOT.war  C:\\Users\\b.deenadayalu\\DeploymentFolder\\'
+    }
+    stage('upload to S3') {
+        s3Upload consoleLogLevel: 'INFO', dontWaitForConcurrentBuildCompletion: false, entries: [[bucket: 'dbharanidharan', excludedFile: '', flatten: false, gzipFiles: false, keepForever: false, managedArtifacts: true, noUploadOnFailure: false, selectedRegion: 'us-east-1', showDirectlyInBrowser: false, sourceFile: '**/*.xml', storageClass: 'STANDARD', uploadFromSlave: false, useServerSideEncryption: false]], pluginFailureResultConstraint: 'FAILURE', profileName: 'S3_Profile', userMetadata: [[key: '', value: '']]
+    }
+}
